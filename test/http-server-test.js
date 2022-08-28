@@ -154,5 +154,48 @@ vows.describe('http-server').addBatch({
         assert.ok(res.headers['access-control-allow-headers'].split(/\s*,\s*/g).indexOf('X-Test') >= 0, 204);
       }
     }
+  },
+  'When extra header are provided': {
+    topic: function () {
+      var server = httpServer.createServer({
+        root: root,
+        extraHeaders: ['X-Header:extra']
+      });
+      server.listen(8083);
+      this.callback(null, server);
+    },
+    'and request is issued to server with extra header': {
+      topic: function () {
+        request({
+          method: 'GET',
+          uri: 'http://127.0.0.1:8083/'
+        }, this.callback);
+      },
+      'response should contain extra header': function (err, res) {
+        assert.equal(res.headers['x-header'], 'extra');
+      }
+    }
+  },
+  'When multiple extra headers are provided': {
+    topic: function () {
+      var server = httpServer.createServer({
+        root: root,
+        extraHeaders: ['X-Header-One:extra-one', 'X-Header-Two:extra-two']
+      });
+      server.listen(8084);
+      this.callback(null, server);
+    },
+    'and request is issued to server with extra headers': {
+      topic: function () {
+        request({
+          method: 'GET',
+          uri: 'http://127.0.0.1:8084/'
+        }, this.callback);
+      },
+      'response should contain extra headers': function (err, res) {
+        assert.equal(res.headers['x-header-one'], 'extra-one');
+        assert.equal(res.headers['x-header-two'], 'extra-two');
+      }
+    }
   }
 }).export(module);
